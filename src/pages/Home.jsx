@@ -1,4 +1,6 @@
- function Home() {
+ import { Link } from "react-router-dom";
+
+function Home() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-500 to-purple-600 text-white p-8">
 
@@ -10,12 +12,12 @@
         Translate text into 100+ languages instantly.
       </p>
 
-      <a
-        href="/translator"
-        className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100"
+      <Link
+        to="/translator"
+        className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300"
       >
         Start Translating
-      </a>
+      </Link>
 
     </div>
   );
