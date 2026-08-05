@@ -6,7 +6,10 @@ function Translator() {
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
-  return localStorage.getItem("theme") === "dark";
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("theme") === "dark";
+  }
+  return false;
 });
 
   const [sourceLanguage, setSourceLanguage] = useState("en");
@@ -27,9 +30,10 @@ function Translator() {
     { code: "zh", speech: "zh-CN", name: "Chinese" },
     { code: "ar", speech: "ar-SA", name: "Arabic" },
   ];
-    useEffect(() => {
-   localStorage.setItem("theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
+     useEffect(() => {
+  localStorage.setItem("theme", darkMode ? "dark" : "light");
+  document.documentElement.classList.toggle("dark", darkMode);
+}, [darkMode]);
 
   const translateText = async () => {
     if (!text.trim()) {
@@ -73,28 +77,33 @@ function Translator() {
   };
 
   const swapLanguages = () => {
-    const s = sourceLanguage;
-    setSourceLanguage(targetLanguage);
-    setTargetLanguage(s);
+  setSourceLanguage(targetLanguage);
+  setTargetLanguage(sourceLanguage);
 
-    const t = text;
-    setText(translatedText);
-    setTranslatedText(t);
-  };
+  setText(translatedText);
+  setTranslatedText(text);
+};
 
-  const copyText = async () => {
-    if (!translatedText) return;
+   const copyText = async () => {
+  if (!translatedText) {
+    alert("Nothing to copy.");
+    return;
+  }
 
+  try {
     await navigator.clipboard.writeText(translatedText);
     alert("Copied Successfully!");
-  };
+  } catch (err) {
+    alert("Copy failed.");
+  }
+};
 
   const clearText = () => {
-    setText("");
-    setTranslatedText("");
-  };
-
-  // Speech Recognition
+  setText("");
+  setTranslatedText("");
+  setListening(false);
+};
+  
   const startListening = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -145,150 +154,144 @@ function Translator() {
   };
 
   return (
-         
-        <div
-  className={`min-h-screen flex items-center justify-center p-6 transition-all duration-500 ${
-    darkMode
-      ? "bg-gray-900"
-      : "bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600"
-  }`}
+  <div
+    className={`min-h-screen flex items-center justify-center px-4 py-8 transition-all duration-500 ${
+      darkMode
+        ? "bg-gray-900"
+        : "bg-linear-to-br from-blue-500 via-indigo-500 to-purple-600"
+    }`}
+  >
+    <div
+      className={`w-full max-w-5xl rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 transition-all duration-500 ${
+        darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+      }`}
     >
-         <div
-  className={`w-full max-w-4xl rounded-2xl shadow-2xl p-8 transition-all duration-500 ${
-    darkMode
-      ? "bg-gray-800 text-white"
-      : "bg-white text-black"
-       }`}
+    
+
+      <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-center text-blue-600 mb-2">
+        🌍 AI Language Translator
+      </h1>
+
+      <div className="flex justify-center sm:justify-end mb-4">
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700"
         >
+          {darkMode ? "☀ Light Mode" : "🌙 Dark Mode"}
+        </button>
+      </div>
 
-
-          <h1 className="text-4xl font-bold text-center text-blue-600 mb-2">
-            🌍 AI Language Translator
-          </h1>
-          <div className="flex justify-end mb-4">
-       <button
-            onClick={() => setDarkMode(!darkMode)}
-           className="px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700"
-         >
-         {darkMode ? "☀ Light Mode" : "🌙 Dark Mode"}
-         </button>
-        </div>
-
-          <p
-          className={`text-center mb-8 ${
+      <p
+        className={`text-center text-sm sm:text-base mb-8 ${
           darkMode ? "text-gray-300" : "text-gray-500"
         }`}
       >
-            Translate text into multiple languages instantly
-          </p>
+        Translate text into multiple languages instantly
+      </p>
 
-          <textarea
-            rows="6"
-            placeholder="Enter text here..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className={`w-full border-2 rounded-xl p-4 text-lg focus:outline-none ${
-         darkMode
-           ? "bg-gray-700 text-white border-gray-600"
+      <textarea
+        rows="5"
+        placeholder="Enter text here..."
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        className={`w-full border-2 rounded-xl p-3 sm:p-4 text-base sm:text-lg resize-none focus:outline-none ${
+          darkMode
+            ? "bg-gray-700 text-white border-gray-600"
             : "bg-white text-black border-gray-300"
         }`}
-          />
+      />
 
-          <button
-            onClick={startListening}
-            className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg mt-4"
-          >
-            {listening ? "🎤 Listening..." : "🎤 Speak"}
-          </button>
+      <button
+        onClick={startListening}
+        className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl mt-4"
+      >
+        {listening ? "🎤 Listening..." : "🎤 Speak"}
+      </button>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
-
-            <select
-              value={sourceLanguage}
-              onChange={(e) => setSourceLanguage(e.target.value)}
-              className="w-56 border-2 border-gray-300 rounded-xl p-3"
-            >
-              {languages.map((lang) => (
-                <option key={lang.code} value={lang.code}>
-                  {lang.name}
-                </option>
-              ))}
-            </select>
-
-            <button
-              onClick={swapLanguages}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-xl"
-            >
-              ⇄
-            </button>
-
-            <select
-              value={targetLanguage}
-              onChange={(e) => setTargetLanguage(e.target.value)}
-               className={`w-56 border-2 rounded-xl p-3 ${
-              darkMode
-         ? "bg-gray-700 text-white border-gray-600"
-         : "bg-white text-black border-gray-300"
+      <div className="flex flex-col md:flex-row items-center justify-center gap-4 mt-6">
+        <select
+          value={sourceLanguage}
+          onChange={(e) => setSourceLanguage(e.target.value)}
+          className={`w-full md:w-56 border-2 rounded-xl p-3 ${
+            darkMode
+              ? "bg-gray-700 text-white border-gray-600"
+              : "bg-white text-black border-gray-300"
           }`}
-            >
-              {languages.map((lang) => (
-                <option key={lang.code} value={lang.code}>
-                  {lang.name}
-                </option>
-              ))}
-            </select>
+        >
+          {languages.map((lang) => (
+            <option key={lang.code} value={lang.code}>
+              {lang.name}
+            </option>
+          ))}
+        </select>
 
-          </div>
+        <button
+          onClick={swapLanguages}
+          className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-xl"
+        >
+          ⇄
+        </button>
 
-          <button
-            onClick={translateText}
-            disabled={loading}
-            className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl"
-          >
-            {loading ? "Translating..." : "Translate"}
-          </button>
-
-          <div className="mt-8">
-
-            <h2 className="text-2xl font-bold mb-3">
-              Translated Text
-            </h2>
-            
-            <div
-  className={`border-2 rounded-xl p-5 min-h-[150px] ${
-    darkMode
-      ? "bg-gray-700 border-gray-600 text-white"
-      : "bg-gray-50 border-gray-300 text-black"
-     }`}
-  >
-      {translatedText || "Your translated text will appear here..."}
-        </div>
-
-          </div>
-
-          <div className="flex justify-center gap-4 mt-6">
-
-            <button
-              onClick={copyText}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl"
-            >
-              📋 Copy
-            </button>
-
-            <button
-              onClick={clearText}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl"
-            >
-              🗑 Clear
-            </button>
-
-          </div>
-
-        </div>
-
+        <select
+          value={targetLanguage}
+          onChange={(e) => setTargetLanguage(e.target.value)}
+          className={`w-full md:w-56 border-2 rounded-xl p-3 ${
+            darkMode
+              ? "bg-gray-700 text-white border-gray-600"
+              : "bg-white text-black border-gray-300"
+          }`}
+        >
+          {languages.map((lang) => (
+            <option key={lang.code} value={lang.code}>
+              {lang.name}
+            </option>
+          ))}
+        </select>
       </div>
-    
-  );
+
+      <button
+        onClick={translateText}
+        disabled={loading}
+        className="w-full mt-6 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white py-3 rounded-xl text-sm sm:text-base transition" 
+      >
+        {loading ? "Translating..." : "Translate"}
+      </button>
+
+      <div className="mt-8">
+        <h2 className="text-xl sm:text-2xl font-bold mb-3">
+          Translated Text
+        </h2>
+
+        <div
+           className={`border-2 rounded-xl p-5 min-h-37.5 warp-break-word whitespace-pre-wrap ${
+            darkMode
+              ? "bg-gray-700 border-gray-600 text-white"
+              : "bg-gray-50 border-gray-300 text-black"
+          }`}
+        >
+          {translatedText || "Your translated text will appear here..."}
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+        <button
+          onClick={copyText}
+          className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl"
+        >
+          📋 Copy
+        </button>
+
+        <button
+          onClick={clearText}
+          className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl"
+        >
+          🗑 Clear
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 }
 
 export default Translator;

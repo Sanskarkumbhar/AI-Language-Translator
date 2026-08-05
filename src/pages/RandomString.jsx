@@ -41,7 +41,7 @@ function RandomString() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-blue-500 to-purple-600 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-linear-to-br from-indigo-500 via-blue-500 to-purple-600 flex items-center justify-center p-6">
 
       <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl p-8">
 

@@ -2,7 +2,7 @@
 
 function Home() {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-500 to-purple-600 text-white p-8">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-linear-to-br from-blue-500 to-purple-600 text-white p-8">
 
       <h1 className="text-5xl font-bold mb-4">
         🌍 AI Language Translator
